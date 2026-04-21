@@ -14,42 +14,52 @@ export class SeatsService {
   async getAvailableSeats(dto: AvailableSeatsDto) {
     const segment = await this.tripsService.getSegmentOrders(dto.tripId, dto.from, dto.to);
 
-    const trip = await this.prisma.trip.findUniqueOrThrow({
-      where: { id: dto.tripId },
-      select: {
-        id: true,
-        train: {
-          select: {
-            coaches: {
-              orderBy: { index: 'asc' },
-              select: {
-                id: true,
-                code: true,
-                index: true,
-                seats: {
-                  orderBy: { number: 'asc' },
-                  select: {
-                    id: true,
-                    number: true,
-                    type: true,
+    const [trip, occupiedTickets, segmentPrice] = await Promise.all([
+      this.prisma.trip.findUniqueOrThrow({
+        where: { id: dto.tripId },
+        select: {
+          id: true,
+          train: {
+            select: {
+              coaches: {
+                orderBy: { index: 'asc' },
+                select: {
+                  id: true,
+                  code: true,
+                  index: true,
+                  seats: {
+                    orderBy: { number: 'asc' },
+                    select: {
+                      id: true,
+                      number: true,
+                      type: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
-
-    const occupiedTickets = await this.prisma.ticket.findMany({
-      where: {
-        tripId: dto.tripId,
-        status: TicketStatus.BOOKED,
-        fromOrder: { lt: segment.toOrder },
-        toOrder: { gt: segment.fromOrder },
-      },
-      select: { seatId: true },
-    });
+      }),
+      this.prisma.ticket.findMany({
+        where: {
+          tripId: dto.tripId,
+          status: TicketStatus.BOOKED,
+          fromOrder: { lt: segment.toOrder },
+          toOrder: { gt: segment.fromOrder },
+        },
+        select: { seatId: true },
+      }),
+      this.prisma.segmentPrice.findUnique({
+        where: {
+          tripId_fromStationId_toStationId: {
+            tripId: dto.tripId,
+            fromStationId: dto.from,
+            toStationId: dto.to,
+          },
+        },
+      }),
+    ]);
 
     const occupiedSeatIds = new Set(occupiedTickets.map((t) => t.seatId));
 
@@ -69,6 +79,7 @@ export class SeatsService {
       tripId: dto.tripId,
       from: dto.from,
       to: dto.to,
+      priceCents: segmentPrice?.priceCents ?? 0,
       segment,
       seats,
       availableSeats: seats.filter((s) => s.available),
