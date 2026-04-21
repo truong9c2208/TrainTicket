@@ -1,0 +1,13 @@
+import { Controller, Get, Query } from '@nestjs/common';
+import { SearchStationsDto } from './dto/search-stations.dto';
+import { StationsService } from './stations.service';
+
+@Controller('stations')
+export class StationsController {
+  constructor(private readonly stationsService: StationsService) {}
+
+  @Get()
+  search(@Query() query: SearchStationsDto) {
+    return this.stationsService.search(query);
+  }
+}

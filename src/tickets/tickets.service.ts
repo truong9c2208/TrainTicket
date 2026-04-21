@@ -24,7 +24,14 @@ export class TicketsService {
 
   async listMyTickets(userId: string) {
     return this.prisma.ticket.findMany({
-      where: { userId },
+      where: {
+        userId,
+        trip: {
+          departureDate: {
+            gte: new Date(),
+          },
+        },
+      },
       include: {
         trip: true,
         seat: {
@@ -35,7 +42,7 @@ export class TicketsService {
         fromStation: true,
         toStation: true,
       },
-      orderBy: { bookedAt: 'desc' },
+      orderBy: [{ trip: { departureDate: 'asc' } }, { bookedAt: 'desc' }],
     });
   }
 
