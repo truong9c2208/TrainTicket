@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SeatType {
+  SEAT
+  BED
+}
+
+enum TicketStatus {
+  BOOKED
+  CANCELED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tickets      Ticket[]
+}
+
+model Station {
+  id               String        @id @default(cuid())
+  code             String        @unique
+  name             String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  tripStations     TripStation[]
+  ticketsFrom      Ticket[]      @relation("TicketFromStation")
+  ticketsTo        Ticket[]      @relation("TicketToStation")
+  segmentPriceFrom SegmentPrice[] @relation("SegmentPriceFrom")
+  segmentPriceTo   SegmentPrice[] @relation("SegmentPriceTo")
+}
+
+model Train {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  coaches   Coach[]
+  trips     Trip[]
+}
+
+model Coach {
+  id        String   @id @default(cuid())
+  trainId   String
+  code      String
+  index     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  train      Train   @relation(fields: [trainId], references: [id], onDelete: Cascade)
+  seats      Seat[]
+
+  @@unique([trainId, code])
+  @@unique([trainId, index])
+  @@index([trainId])
+}
+
+model Seat {
+  id        String   @id @default(cuid())
+  coachId   String
+  number    String
+  type      SeatType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  coach     Coach    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  tickets   Ticket[]
+
+  @@unique([coachId, number])
+  @@index([coachId])
+}
+
+model Trip {
+  id             String        @id @default(cuid())
+  trainId        String
+  code           String        @unique
+  departureDate  DateTime
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  train          Train         @relation(fields: [trainId], references: [id], onDelete: Restrict)
+  stations       TripStation[]
+  tickets        Ticket[]
+  segmentPrices  SegmentPrice[]
+
+  @@index([trainId, departureDate])
+}
+
+model TripStation {
+  id            String    @id @default(cuid())
+  tripId        String
+  stationId     String
+  stationOrder  Int
+  arrivalTime   DateTime?
+  departureTime DateTime?
+  trip          Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  station       Station   @relation(fields: [stationId], references: [id], onDelete: Restrict)
+
+  @@unique([tripId, stationOrder])
+  @@unique([tripId, stationId])
+  @@index([tripId, stationOrder])
+  @@index([stationId])
+}
+
+model SegmentPrice {
+  id            String   @id @default(cuid())
+  tripId        String
+  fromStationId String
+  toStationId   String
+  priceCents    Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  fromStation   Station  @relation("SegmentPriceFrom", fields: [fromStationId], references: [id], onDelete: Restrict)
+  toStation     Station  @relation("SegmentPriceTo", fields: [toStationId], references: [id], onDelete: Restrict)
+
+  @@unique([tripId, fromStationId, toStationId])
+  @@index([tripId])
+}
+
+model Ticket {
+  id            String       @id @default(cuid())
+  userId        String
+  tripId        String
+  seatId        String
+  fromStationId String
+  toStationId   String
+  fromOrder     Int
+  toOrder       Int
+  status        TicketStatus @default(BOOKED)
+  priceCents    Int
+  refundCents   Int?
+  bookedAt      DateTime     @default(now())
+  canceledAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user          User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  trip          Trip         @relation(fields: [tripId], references: [id], onDelete: Restrict)
+  seat          Seat         @relation(fields: [seatId], references: [id], onDelete: Restrict)
+  fromStation   Station      @relation("TicketFromStation", fields: [fromStationId], references: [id], onDelete: Restrict)
+  toStation     Station      @relation("TicketToStation", fields: [toStationId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status])
+  @@index([tripId, status])
+  @@index([tripId, seatId, status])
+  @@index([tripId, fromOrder, toOrder, status])
+}
