@@ -4,7 +4,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { AxiosError } from 'axios';
 import { FormTextInput } from '../components/FormTextInput';
 import { useAuthActions } from '../hooks/useAuth';
-import { commonStyles } from '../styles/common';
+import { useThemeStore } from '../store/theme.store';
+import { useAppTheme } from '../theme';
 
 type AuthForm = {
   fullName: string;
@@ -14,6 +15,8 @@ type AuthForm = {
 
 export function AuthScreen() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
+  const { commonStyles, colors, mode: themeMode } = useAppTheme();
+  const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const { loginMutation, registerMutation } = useAuthActions();
 
   const {
@@ -52,7 +55,12 @@ export function AuthScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <Text style={commonStyles.heading}>{mode === 'login' ? 'Login' : 'Register'}</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={commonStyles.heading}>{mode === 'login' ? 'Login' : 'Register'}</Text>
+        <Pressable style={[commonStyles.buttonSecondary, { paddingVertical: 8 }]} onPress={toggleTheme}>
+          <Text style={commonStyles.buttonText}>{themeMode === 'light' ? 'Dark' : 'Light'}</Text>
+        </Pressable>
+      </View>
 
       {mode === 'register' ? (
         <Controller
@@ -74,7 +82,7 @@ export function AuthScreen() {
       ) : null}
 
       {errors.fullName ? (
-        <Text style={{ color: '#b91c1c', marginBottom: 8 }}>{errors.fullName.message}</Text>
+        <Text style={{ color: colors.danger, marginBottom: 8 }}>{errors.fullName.message}</Text>
       ) : null}
 
       <Controller
@@ -98,7 +106,7 @@ export function AuthScreen() {
       />
 
       {errors.email ? (
-        <Text style={{ color: '#b91c1c', marginBottom: 8 }}>{errors.email.message}</Text>
+        <Text style={{ color: colors.danger, marginBottom: 8 }}>{errors.email.message}</Text>
       ) : null}
 
       <Controller
@@ -120,7 +128,7 @@ export function AuthScreen() {
       />
 
       {errors.password ? (
-        <Text style={{ color: '#b91c1c', marginBottom: 8 }}>{errors.password.message}</Text>
+        <Text style={{ color: colors.danger, marginBottom: 8 }}>{errors.password.message}</Text>
       ) : null}
 
       <Pressable style={commonStyles.button} onPress={handleSubmit(onSubmit)}>
@@ -128,7 +136,7 @@ export function AuthScreen() {
       </Pressable>
 
       <Pressable style={{ marginTop: 12 }} onPress={() => setMode(mode === 'login' ? 'register' : 'login')}>
-        <Text style={{ color: '#0f766e', fontWeight: '600' }}>
+        <Text style={{ color: colors.accent, fontWeight: '600' }}>
           {mode === 'login' ? 'No account? Register' : 'Already have account? Login'}
         </Text>
       </Pressable>

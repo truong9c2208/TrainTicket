@@ -3,11 +3,12 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAvailableSeats } from '../hooks/useSeats';
 import { RootStackParamList } from '../navigation/types';
-import { commonStyles } from '../styles/common';
+import { useAppTheme } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SeatSelection'>;
 
 export function SeatSelectionScreen({ route, navigation }: Props) {
+  const { commonStyles, colors, mode } = useAppTheme();
   const { tripId, from, to } = route.params;
   const seatsQuery = useAvailableSeats({ tripId, from, to });
 
@@ -30,7 +31,10 @@ export function SeatSelectionScreen({ route, navigation }: Props) {
   return (
     <ScrollView style={commonStyles.container}>
       <Text style={commonStyles.heading}>Seat Map</Text>
-      <Text style={{ marginBottom: 10 }}>Unavailable seats are disabled for this segment.</Text>
+      <Text style={{
+        ...commonStyles.bodyText,
+        marginBottom: 10,
+      }}>Unavailable seats are disabled for this segment.</Text>
 
       {seatsQuery.data.seats.map((seat) => (
         <Pressable
@@ -38,8 +42,8 @@ export function SeatSelectionScreen({ route, navigation }: Props) {
           disabled={!seat.available}
           style={{
             ...commonStyles.card,
-            opacity: seat.available ? 1 : 0.4,
-            borderColor: seat.available ? '#0f766e' : '#d1d5db',
+            opacity: seat.available ? 1 : 0.6,
+            borderColor: seat.available ? colors.accent : colors.inputBorder,
           }}
           onPress={() =>
             navigation.navigate('BookingConfirmation', {
@@ -50,11 +54,14 @@ export function SeatSelectionScreen({ route, navigation }: Props) {
             })
           }
         >
-          <Text style={{ fontWeight: '700' }}>
+          <Text style={{
+            ...commonStyles.label,
+            fontWeight: '700'
+          }}>
             Coach {seat.coachCode} / Seat {seat.seatNumber}
           </Text>
-          <Text>Type: {seat.seatType}</Text>
-          <Text>Status: {seat.available ? 'Available' : 'Occupied on overlap segment'}</Text>
+          <Text style={{ color: colors.textPrimary }}>Type: {seat.seatType}</Text>
+          <Text style={{ color: colors.textSecondary }}>Status: {seat.available ? 'Available' : 'Occupied on overlap segment'}</Text>
         </Pressable>
       ))}
     </ScrollView>

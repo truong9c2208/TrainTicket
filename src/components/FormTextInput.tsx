@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
+import { useAppTheme } from '../theme';
 
 type Props = {
   label: string;
@@ -7,6 +8,7 @@ type Props = {
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
   placeholder?: string;
+  error?: string;
 };
 
 export function FormTextInput({
@@ -15,36 +17,22 @@ export function FormTextInput({
   onChangeText,
   secureTextEntry,
   placeholder,
+  error,
 }: Props) {
+  const { colors, commonStyles } = useAppTheme();
+
   return (
-    <View style={styles.wrap}>
-      <Text style={styles.label}>{label}</Text>
+    <View style={{ marginBottom: 12 }}>
+      <Text style={commonStyles.label}>{label}</Text>
       <TextInput
-        style={styles.input}
+        style={commonStyles.input}
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
         placeholder={placeholder}
+        placeholderTextColor={colors.textSecondary}
       />
+      {error ? <Text style={{ color: colors.danger, marginTop: 6 }}>{error}</Text> : null}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: 12,
-  },
-  label: {
-    marginBottom: 6,
-    color: '#374151',
-    fontWeight: '600',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: '#ffffff',
-  },
-});

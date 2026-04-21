@@ -24,6 +24,8 @@ export type Trip = {
   id: string;
   code: string;
   departureDate: string;
+  fromStationName?: string;
+  toStationName?: string;
   train: {
     id: string;
     code: string;
