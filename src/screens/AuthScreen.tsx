@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
-import { AxiosError } from 'axios';
 import { FormTextInput } from '../components/FormTextInput';
 import { useAuthActions } from '../hooks/useAuth';
 import { useThemeStore } from '../store/theme.store';
 import { useAppTheme } from '../theme';
+import {
+  AUTH_VALIDATION,
+  validateEmail,
+  validateFullName,
+  validatePassword,
+} from '../../../shared/src/validation/auth';
+import { HttpError } from '../../../shared/src/api/http-client';
 
 type AuthForm = {
   fullName: string;
@@ -39,8 +45,11 @@ export function AuthScreen() {
         await registerMutation.mutateAsync(form);
       }
     } catch (error) {
-      const axiosError = error as AxiosError<{ message?: string | string[] }>;
-      const responseMessage = axiosError.response?.data?.message;
+      const httpError = error as HttpError;
+      const responseMessage =
+        httpError && typeof httpError === 'object' && 'data' in httpError
+          ? ((httpError.data as { message?: string | string[] } | null)?.message ?? null)
+          : null;
 
       const backendMessage = Array.isArray(responseMessage)
         ? responseMessage.join('\n')
@@ -68,7 +77,7 @@ export function AuthScreen() {
           name="fullName"
           rules={{
             required: 'Full name is required',
-            minLength: { value: 2, message: 'Full name is too short' },
+            validate: validateFullName,
           }}
           render={({ field }) => (
             <FormTextInput
@@ -90,10 +99,7 @@ export function AuthScreen() {
         name="email"
         rules={{
           required: 'Email is required',
-          pattern: {
-            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: 'Please enter a valid email address',
-          },
+          validate: validateEmail,
         }}
         render={({ field }) => (
           <FormTextInput
@@ -114,7 +120,11 @@ export function AuthScreen() {
         name="password"
         rules={{
           required: 'Password is required',
-          minLength: { value: 8, message: 'Password must be at least 8 characters' },
+          minLength: {
+            value: AUTH_VALIDATION.passwordMinLength,
+            message: `Password must be at least ${AUTH_VALIDATION.passwordMinLength} characters`,
+          },
+          validate: validatePassword,
         }}
         render={({ field }) => (
           <FormTextInput

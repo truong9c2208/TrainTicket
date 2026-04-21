@@ -23,7 +23,8 @@ export function TripListScreen({ route, navigation }: Props) {
   if (tripsQuery.isError) {
     return (
       <View style={commonStyles.container}>
-        <Text>Failed to load trips.</Text>
+        <Text style={{ color: colors.danger }}>Failed to load trips.</Text>
+        <Text style={{ color: colors.textSecondary }}>{String(tripsQuery.error)}</Text>
       </View>
     );
   }

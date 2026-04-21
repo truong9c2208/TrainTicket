@@ -1,20 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import { useAuthStore } from '../store/auth.store';
+import { ACCESS_TOKEN_KEY } from '../../../shared/src/auth/session';
+import { createHttpClient } from '../../../shared/src/api/http-client';
 
-export const api = axios.create({
-  baseURL: 'https://ch01-be.shibaa.uk/api',
-  timeout: 10000,
-});
-
-api.interceptors.request.use(async (config) => {
-  const inMemoryToken = useAuthStore.getState().token;
-  const persistedToken = await AsyncStorage.getItem('accessToken');
-  const token = inMemoryToken ?? persistedToken;
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
+export const api = createHttpClient({
+  baseUrl: 'https://ch01-be.shibaa.uk/api',
+  timeoutMs: 10000,
+  getAccessToken: async () => {
+    const inMemoryToken = useAuthStore.getState().token;
+    const persistedToken = await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
+    return inMemoryToken ?? persistedToken;
+  },
 });

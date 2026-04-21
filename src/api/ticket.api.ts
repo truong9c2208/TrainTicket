@@ -7,16 +7,13 @@ export const bookTicket = async (payload: {
   fromStationId: string;
   toStationId: string;
 }) => {
-  const { data } = await api.post<Ticket>('/tickets/book', payload);
-  return data;
+  return api.post<Ticket>('/tickets/book', payload);
 };
 
 export const cancelTicket = async (payload: { ticketId: string }) => {
-  const { data } = await api.post<Ticket>('/tickets/cancel', payload);
-  return data;
+  return api.post<Ticket>('/tickets/cancel', payload);
 };
 
 export const getMyTickets = async () => {
-  const { data } = await api.get<Ticket[]>('/tickets/mine');
-  return data;
+  return api.get<Ticket[]>('/tickets/mine');
 };

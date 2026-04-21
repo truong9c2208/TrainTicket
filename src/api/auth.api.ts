@@ -6,11 +6,9 @@ export const register = async (payload: {
   password: string;
   fullName: string;
 }) => {
-  const { data } = await api.post<AuthResponse>('/auth/register', payload);
-  return data;
+  return api.post<AuthResponse>('/auth/register', payload);
 };
 
 export const login = async (payload: { email: string; password: string }) => {
-  const { data } = await api.post<AuthResponse>('/auth/login', payload);
-  return data;
+  return api.post<AuthResponse>('/auth/login', payload);
 };

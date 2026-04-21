@@ -5,11 +5,10 @@ export const searchStations = async (q: string) => {
   const normalized = q.trim().toLowerCase();
 
   try {
-    const { data } = await api.get<Station[]>('/stations', { params: { q } });
-    return data;
+    return api.get<Station[]>('/stations', { params: { q } });
   } catch {
     // Fallback for older deployments that do not expose /stations yet.
-    const { data: trips } = await api.get<Trip[]>('/trips');
+    const trips = await api.get<Trip[]>('/trips');
 
     const uniqueStations = new Map<string, Station>();
 

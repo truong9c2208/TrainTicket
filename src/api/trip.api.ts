@@ -6,7 +6,7 @@ export const getTrips = async (params: {
   to?: string;
   date?: string;
 }) => {
-  const { data } = await api.get<Trip[]>('/trips', { params });
+  const data = await api.get<Trip[]>('/trips', { params });
 
   return data.map((trip) => {
     const first = trip.stations?.[0]?.station?.name;
@@ -20,8 +20,7 @@ export const getTrips = async (params: {
 };
 
 export const getTrip = async (tripId: string) => {
-  const { data } = await api.get<Trip>(`/trips/${tripId}`);
-  return data;
+  return api.get<Trip>(`/trips/${tripId}`);
 };
 
 export const getAvailableSeats = async (params: {
@@ -29,8 +28,5 @@ export const getAvailableSeats = async (params: {
   from: string;
   to: string;
 }) => {
-  const { data } = await api.get<AvailableSeatsResponse>('/seats/available', {
-    params,
-  });
-  return data;
+  return api.get<AvailableSeatsResponse>('/seats/available', { params });
 };

@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Controller, useForm } from 'react-hook-form';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -17,6 +18,7 @@ import { useAuthStore } from '../store/auth.store';
 import { useThemeStore } from '../store/theme.store';
 import { useAppTheme } from '../theme';
 import { RootStackParamList } from '../navigation/types';
+import { ACCESS_TOKEN_KEY } from '../../../shared/src/auth/session';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SearchTrip'>;
 
@@ -71,6 +73,11 @@ export function SearchTripScreen({ navigation }: Props) {
     setStationQuery('');
   };
 
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
+    logout();
+  };
+
   const handleSelectStation = (station: { id: string; name: string }) => {
     if (pickerTarget === 'from') {
       setSelectedFrom(station);
@@ -99,7 +106,7 @@ export function SearchTripScreen({ navigation }: Props) {
     <ScrollView style={commonStyles.container}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text style={commonStyles.heading}>Find Train</Text>
-        <Pressable style={[commonStyles.buttonSecondary, { paddingVertical: 8 }]} onPress={toggleTheme}>
+        <Pressable style={[commonStyles.button, { paddingVertical: 8 }]} onPress={toggleTheme}>
           <Text style={commonStyles.buttonText}>{mode === 'light' ? 'Dark' : 'Light'}</Text>
         </Pressable>
       </View>
@@ -183,13 +190,13 @@ export function SearchTripScreen({ navigation }: Props) {
         </Pressable>
 
         <Pressable
-          style={[commonStyles.buttonSecondary, { marginTop: 10 }]}
+          style={[commonStyles.button, { marginTop: 10 }]}
           onPress={() => navigation.navigate('MyTickets')}
         >
           <Text style={commonStyles.buttonText}>My Tickets</Text>
         </Pressable>
 
-        <Pressable style={{ marginTop: 14 }} onPress={logout}>
+        <Pressable style={{ marginTop: 14 }} onPress={handleLogout}>
           <Text style={{ color: colors.danger, textAlign: 'center' }}>Logout</Text>
         </Pressable>
       </View>
@@ -238,8 +245,8 @@ export function SearchTripScreen({ navigation }: Props) {
                   {stationsQuery.isLoading
                     ? 'Loading stations...'
                     : stationsQuery.isError
-                    ? 'Unable to load stations. Please check your network and login.'
-                    : 'No station found.'}
+                      ? 'Unable to load stations. Please check your network and login.'
+                      : 'No station found.'}
                 </Text>
               }
             />
