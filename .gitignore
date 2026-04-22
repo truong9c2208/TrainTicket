@@ -1,4 +1,2 @@
 node_modules
-.env
-android/key.properties
-android/app/*.keystore
+.turbo
