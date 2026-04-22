@@ -22,7 +22,7 @@ Backend for Train Ticket Management System.
 1. Clone the repository
 
 ```bash
-git clone -b back-end --single-branch https://github.com/shibaa05/TrainTicket.git
+git clone -b back-end --single-branch https://github.com/truong9c2208/TrainTicket.git
 ```
 2. Install dependencies
 
