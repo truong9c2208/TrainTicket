@@ -43,11 +43,16 @@ async function main() {
 
   const customer = await prisma.user.upsert({
     where: { email: 'demo.user@train.local' },
-    update: {},
+    update: {
+      passwordHash: '$2b$10$f2CirZ.vu1cYlJoEVKKHd.wqljLDMrqVbH/pSN9hwT1y8yKf5sLf6',
+      role: Role.CUSTOMER,
+      phone: '0987654321',
+      address: 'Hanoi, Vietnam',
+    },
     create: {
       email: 'demo.user@train.local',
       fullName: 'Demo Customer',
-      passwordHash: '$2b$10$MCf6x9WceMjeA5xAAsbEV.SvHF6E53P7IvrQj6MKf5H8pxf3gDO/e',
+      passwordHash: '$2b$10$f2CirZ.vu1cYlJoEVKKHd.wqljLDMrqVbH/pSN9hwT1y8yKf5sLf6', // password is "password" <(")
       role: Role.CUSTOMER,
       phone: '0987654321',
       address: 'Hanoi, Vietnam',
@@ -56,11 +61,16 @@ async function main() {
 
   const manager = await prisma.user.upsert({
     where: { email: 'admin@train.local' },
-    update: {},
+    update: {
+      passwordHash: '$2b$10$f2CirZ.vu1cYlJoEVKKHd.wqljLDMrqVbH/pSN9hwT1y8yKf5sLf6',
+      role: Role.MANAGER,
+      phone: '0123456789',
+      address: 'Danang, Vietnam',
+    },
     create: {
       email: 'admin@train.local',
       fullName: 'System Admin',
-      passwordHash: '$2b$10$MCf6x9WceMjeA5xAAsbEV.SvHF6E53P7IvrQj6MKf5H8pxf3gDO/e', // password is "password" <(")
+      passwordHash: '$2b$10$f2CirZ.vu1cYlJoEVKKHd.wqljLDMrqVbH/pSN9hwT1y8yKf5sLf6', // password is "password" <(")
       role: Role.MANAGER,
       phone: '0123456789',
       address: 'Danang, Vietnam',
