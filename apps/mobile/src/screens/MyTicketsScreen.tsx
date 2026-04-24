@@ -3,6 +3,12 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'rea
 import { useCancelTicket, useMyTickets } from '../hooks/useTickets';
 import { useAppTheme } from '../theme';
 
+function formatDateTime(value: string) {
+  const d = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`;
+}
+
 export function MyTicketsScreen() {
   const { commonStyles, colors } = useAppTheme();
   const ticketsQuery = useMyTickets();
@@ -46,7 +52,7 @@ export function MyTicketsScreen() {
           <Text style={commonStyles.bodyText}>
             {ticket.fromStation.name} -&gt; {ticket.toStation.name}
           </Text>
-          <Text style={commonStyles.bodyText}>Departure: {new Date(ticket.trip.departureDate).toLocaleString()}</Text>
+          <Text style={commonStyles.bodyText}>Departure: {formatDateTime(ticket.trip.departureDate)}</Text>
           <Text style={commonStyles.bodyText}>Status: {ticket.status}</Text>
           <Text style={commonStyles.bodyText}>Price: ${(ticket.priceCents / 100).toFixed(2)}</Text>
           {ticket.refundCents !== null && ticket.refundCents !== undefined ? (

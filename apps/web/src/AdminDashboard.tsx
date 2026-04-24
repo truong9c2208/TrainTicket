@@ -1,6 +1,18 @@
 import { useEffect, useState } from 'react';
 import { webApi } from './lib/client';
 
+const DATE_KEYS = new Set([
+  'createdAt', 'updatedAt', 'departureDate', 'arrivalTime',
+  'departureTime', 'bookedAt', 'canceledAt', 'startDate', 'endDate',
+]);
+
+function formatDateTime(value: string) {
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return value;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`;
+}
+
 export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('stations');
   const [data, setData] = useState<any[]>([]);
@@ -72,6 +84,8 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                         let val = item[k];
                         if (k === 'occupancyRate' && typeof val === 'number') {
                           val = val.toFixed(2);
+                        } else if (DATE_KEYS.has(k) && typeof val === 'string') {
+                          val = formatDateTime(val);
                         }
                         return <td key={k} style={{ borderBottom: '1px solid #eee', padding: '8px' }}>{String(val)}</td>;
                       })}

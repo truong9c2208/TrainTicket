@@ -5,6 +5,12 @@ import { useTripDetail } from '../hooks/useTrips';
 import { RootStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme';
 
+function formatDateTime(value: string) {
+  const d = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`;
+}
+
 type Props = NativeStackScreenProps<RootStackParamList, 'TripDetail'>;
 
 export function TripDetailScreen({ route, navigation }: Props) {
@@ -42,10 +48,10 @@ export function TripDetailScreen({ route, navigation }: Props) {
             {s.stationOrder}. {s.station.name} ({s.station.code})
           </Text>
           <Text style={commonStyles.bodyText}>
-            Arrival: {s.arrivalTime ? new Date(s.arrivalTime).toLocaleString() : 'N/A'}
+            Arrival: {s.arrivalTime ? formatDateTime(s.arrivalTime) : 'N/A'}
           </Text>
           <Text style={commonStyles.bodyText}>
-            Departure: {s.departureTime ? new Date(s.departureTime).toLocaleString() : 'N/A'}
+            Departure: {s.departureTime ? formatDateTime(s.departureTime) : 'N/A'}
           </Text>
         </View>
       ))}
