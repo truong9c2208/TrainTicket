@@ -295,12 +295,12 @@ function App() {
               />
             </label>
             {authError && <p className="error">{authError}</p>}
-            <button type="submit" disabled={authLoading}>
+            <button type="submit" className="btn" disabled={authLoading}>
               {authLoading ? 'Please wait...' : authMode === 'login' ? 'Login' : 'Create account'}
             </button>
           </form>
 
-          <button type="button" className="ghost" onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}>
+          <button type="button" className="btn ghost" onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}>
             {authMode === 'login' ? 'No account? Register' : 'Already have account? Login'}
           </button>
         </section>
@@ -318,10 +318,10 @@ function App() {
         <header className="topbar">
           <h1>Seat Selection</h1>
           <div className="topbar-actions">
-            <button type="button" className="ghost" onClick={toggleTheme}>
+            <button type="button" className="btn ghost" onClick={toggleTheme}>
               {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
             </button>
-            <button type="button" className="ghost" onClick={() => setSelectedTrip(null)}>
+            <button type="button" className="btn ghost" onClick={() => setSelectedTrip(null)}>
               ← Back to Trips
             </button>
           </div>
@@ -344,7 +344,7 @@ function App() {
                 {coaches.map((c) => (
                   <button
                     key={c.id}
-                    className={`coach-btn ${activeCoach === c.id ? 'active' : ''}`}
+                    className={`btn coach-btn ${activeCoach === c.id ? 'active' : ''}`}
                     onClick={() => setActiveCoach(c.id)}
                   >
                     Coach {c.code}
@@ -356,7 +356,7 @@ function App() {
                 {seatsInActiveCoach.map((seat) => (
                   <button
                     key={seat.seatId}
-                    className={`seat-btn ${selectedSeat?.seatId === seat.seatId ? 'selected' : ''}`}
+                    className={`btn seat-btn ${selectedSeat?.seatId === seat.seatId ? 'selected' : ''}`}
                     disabled={!seat.available}
                     onClick={() => setSelectedSeat(seat)}
                   >
@@ -379,7 +379,7 @@ function App() {
                     <p className="subtle">Please select a seat</p>
                   )}
                 </div>
-                <button disabled={!selectedSeat || actionLoading} onClick={handleBookTicket}>
+                <button className="btn" disabled={!selectedSeat || actionLoading} onClick={handleBookTicket}>
                   {actionLoading ? 'Processing...' : 'Confirm & Book'}
                 </button>
               </div>
@@ -395,10 +395,10 @@ function App() {
       <header className="topbar">
         <h1>Train Ticket Dashboard</h1>
         <div className="topbar-actions">
-          <button type="button" className="ghost" onClick={toggleTheme}>
+          <button type="button" className="btn ghost" onClick={toggleTheme}>
             {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
           </button>
-          <button type="button" className="ghost" onClick={handleLogout}>
+          <button type="button" className="btn ghost" onClick={handleLogout}>
             Logout
           </button>
         </div>
@@ -438,7 +438,7 @@ function App() {
               <input type="date" value={travelDate} onChange={(e) => setTravelDate(e.target.value)} required />
             </label>
 
-            <button type="submit" disabled={tripLoading || stationsLoading}>
+            <button type="submit" className="btn" disabled={tripLoading || stationsLoading}>
               {tripLoading ? 'Searching...' : 'Search Trips'}
             </button>
           </form>
@@ -487,7 +487,7 @@ function App() {
                   </p>
                   <p className="subtle">Booked at: {formatDateTime(ticket.bookedAt)}</p>
                   {ticket.status === 'BOOKED' && (
-                    <button className="cancel-btn" disabled={actionLoading} onClick={() => handleCancelTicket(ticket.id)}>
+                    <button className="btn ghost" disabled={actionLoading} onClick={() => handleCancelTicket(ticket.id)}>
                       Cancel Ticket
                     </button>
                   )}

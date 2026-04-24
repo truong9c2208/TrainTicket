@@ -62,7 +62,7 @@ export function createHttpClient(options: CreateHttpClientOptions) {
   const timeoutMs = options.timeoutMs ?? 10000;
 
   async function request<TResponse>(
-    method: 'GET' | 'POST',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     path: string,
     body?: unknown,
     requestOptions?: RequestOptions,
@@ -112,6 +112,12 @@ export function createHttpClient(options: CreateHttpClientOptions) {
     },
     post<TResponse>(path: string, payload?: unknown, requestOptions?: RequestOptions) {
       return request<TResponse>('POST', path, payload, requestOptions);
+    },
+    put<TResponse>(path: string, payload?: unknown, requestOptions?: RequestOptions) {
+      return request<TResponse>('PUT', path, payload, requestOptions);
+    },
+    delete<TResponse>(path: string, requestOptions?: RequestOptions) {
+      return request<TResponse>('DELETE', path, undefined, requestOptions);
     },
   };
 }

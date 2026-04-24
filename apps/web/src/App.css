@@ -4,6 +4,12 @@
   padding: 32px 24px;
 }
 
+.admin-page {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
 .auth-page {
   display: flex;
   align-items: center;
@@ -110,7 +116,7 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.2);
 }
 
-button {
+.btn {
   padding: 12px 24px;
   background: var(--primary-color);
   color: var(--primary-text);
@@ -123,31 +129,31 @@ button {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-button:hover {
+.btn:hover {
   background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-button:active {
+.btn:active {
   transform: translateY(0);
 }
 
-button:disabled {
+.btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-button.ghost {
+.btn.ghost {
   background: transparent;
   color: var(--text-primary);
   border: 1px solid var(--surface-border);
   box-shadow: none;
 }
 
-button.ghost:hover {
+.btn.ghost:hover {
   background: var(--input-bg);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
