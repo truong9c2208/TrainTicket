@@ -1,19 +1,19 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsInt } from 'class-validator';
 
 export class BookTicketDto {
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  tripId!: string;
+  tripId!: number;
 
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  seatId!: string;
+  seatId!: number;
 
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  fromStationId!: string;
+  fromStationId!: number;
 
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  toStationId!: string;
+  toStationId!: number;
 }

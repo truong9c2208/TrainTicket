@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Post, Body, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, Put, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -15,7 +15,7 @@ export class TripsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.tripsService.findOne(id);
   }
 
@@ -29,28 +29,28 @@ export class TripsController {
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER')
-  update(@Param('id') id: string, @Body() body: any) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
     return this.tripsService.update(id, body);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.tripsService.remove(id);
   }
 
   @Post(':id/schedule')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER')
-  setSchedule(@Param('id') id: string, @Body('stations') stations: any[]) {
+  setSchedule(@Param('id', ParseIntPipe) id: number, @Body('stations') stations: any[]) {
     return this.tripsService.setSchedule(id, stations);
   }
 
   @Post(':id/prices')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER')
-  setSegmentPrices(@Param('id') id: string, @Body('prices') prices: any[]) {
+  setSegmentPrices(@Param('id', ParseIntPipe) id: number, @Body('prices') prices: any[]) {
     return this.tripsService.setSegmentPrices(id, prices);
   }
 }

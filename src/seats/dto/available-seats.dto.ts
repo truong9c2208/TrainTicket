@@ -1,15 +1,19 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class AvailableSeatsDto {
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  tripId!: string;
+  @Type(() => Number)
+  tripId!: number;
 
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  from!: string;
+  @Type(() => Number)
+  from!: number;
 
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  to!: string;
+  @Type(() => Number)
+  to!: number;
 }

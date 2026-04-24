@@ -22,7 +22,7 @@ export class TicketsService {
     private readonly lockService: LockService,
   ) {}
 
-  async listMyTickets(userId: string) {
+  async listMyTickets(userId: number) {
     return this.prisma.ticket.findMany({
       where: {
         userId,

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { TrainsService } from './trains.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -18,7 +18,7 @@ export class TrainsController {
 
   @Get(':id')
   @Roles('MANAGER', 'CUSTOMER')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.trainsService.findOne(id);
   }
 
@@ -28,32 +28,32 @@ export class TrainsController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() data: any) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
     return this.trainsService.update(id, data);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.trainsService.remove(id);
   }
 
   @Post(':id/coaches')
-  addCoach(@Param('id') trainId: string, @Body() data: any) {
+  addCoach(@Param('id', ParseIntPipe) trainId: number, @Body() data: any) {
     return this.trainsService.addCoach(trainId, data);
   }
 
   @Delete('coaches/:coachId')
-  removeCoach(@Param('coachId') coachId: string) {
+  removeCoach(@Param('coachId', ParseIntPipe) coachId: number) {
     return this.trainsService.removeCoach(coachId);
   }
 
   @Post('coaches/:coachId/seats')
-  addSeat(@Param('coachId') coachId: string, @Body() data: any) {
+  addSeat(@Param('coachId', ParseIntPipe) coachId: number, @Body() data: any) {
     return this.trainsService.addSeat(coachId, data);
   }
 
   @Delete('seats/:seatId')
-  removeSeat(@Param('seatId') seatId: string) {
+  removeSeat(@Param('seatId', ParseIntPipe) seatId: number) {
     return this.trainsService.removeSeat(seatId);
   }
 }

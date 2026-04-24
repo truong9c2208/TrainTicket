@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsInt } from 'class-validator';
 
 export class CancelTicketDto {
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  ticketId!: string;
+  ticketId!: number;
 }

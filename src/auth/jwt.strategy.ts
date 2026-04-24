@@ -5,7 +5,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthUser } from './types';
 
 type JwtPayload = {
-  sub: string;
+  sub: number;
   email: string;
   role: string;
 };

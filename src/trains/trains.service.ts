@@ -11,7 +11,7 @@ export class TrainsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const train = await this.prisma.train.findUnique({
       where: { id },
       include: { coaches: { include: { seats: true } } },
@@ -24,33 +24,33 @@ export class TrainsService {
     return this.prisma.train.create({ data });
   }
 
-  async update(id: string, data: { name?: string }) {
+  async update(id: number, data: { name?: string }) {
     return this.prisma.train.update({ where: { id }, data });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     return this.prisma.train.delete({ where: { id } });
   }
 
   // Coaches
-  async addCoach(trainId: string, data: { code: string; index: number; name: string; type: string; description?: string }) {
+  async addCoach(trainId: number, data: { code: string; index: number; name: string; type: string; description?: string }) {
     return this.prisma.coach.create({
       data: { ...data, trainId },
     });
   }
 
-  async removeCoach(coachId: string) {
+  async removeCoach(coachId: number) {
     return this.prisma.coach.delete({ where: { id: coachId } });
   }
 
   // Seats
-  async addSeat(coachId: string, data: { number: string; type: 'SEAT' | 'BED'; description?: string }) {
+  async addSeat(coachId: number, data: { number: string; type: 'SEAT' | 'BED'; description?: string }) {
     return this.prisma.seat.create({
       data: { ...data, coachId },
     });
   }
 
-  async removeSeat(seatId: string) {
+  async removeSeat(seatId: number) {
     return this.prisma.seat.delete({ where: { id: seatId } });
   }
 }

@@ -41,7 +41,7 @@ export class TripsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const trip = await this.prisma.trip.findUnique({
       where: { id },
       include: {
@@ -70,7 +70,7 @@ export class TripsService {
     return trip;
   }
 
-  async getSegmentOrders(tripId: string, fromStationId: string, toStationId: string) {
+  async getSegmentOrders(tripId: number, fromStationId: number, toStationId: number) {
     const stations = await this.prisma.tripStation.findMany({
       where: {
         tripId,
@@ -103,15 +103,15 @@ export class TripsService {
     return this.prisma.trip.create({ data });
   }
 
-  async update(id: string, data: any) {
+  async update(id: number, data: any) {
     return this.prisma.trip.update({ where: { id }, data });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     return this.prisma.trip.delete({ where: { id } });
   }
 
-  async setSchedule(tripId: string, stations: { stationId: string; stationOrder: number; arrivalTime?: string; departureTime?: string }[]) {
+  async setSchedule(tripId: number, stations: { stationId: number; stationOrder: number; arrivalTime?: string; departureTime?: string }[]) {
     // We can replace the old schedule with the new one
     await this.prisma.tripStation.deleteMany({ where: { tripId } });
     const createData = stations.map(s => ({
@@ -125,7 +125,7 @@ export class TripsService {
     return this.prisma.tripStation.findMany({ where: { tripId }, orderBy: { stationOrder: 'asc' } });
   }
 
-  async setSegmentPrices(tripId: string, prices: { fromStationId: string; toStationId: string; priceCents: number }[]) {
+  async setSegmentPrices(tripId: number, prices: { fromStationId: number; toStationId: number; priceCents: number }[]) {
     await this.prisma.segmentPrice.deleteMany({ where: { tripId } });
     const createData = prices.map(p => ({
       tripId,

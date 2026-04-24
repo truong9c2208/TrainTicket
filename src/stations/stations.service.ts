@@ -27,11 +27,11 @@ export class StationsService {
     return this.prisma.station.create({ data });
   }
 
-  async update(id: string, data: { name?: string; phone?: string; address?: string; description?: string }) {
+  async update(id: number, data: { name?: string; phone?: string; address?: string; description?: string }) {
     return this.prisma.station.update({ where: { id }, data });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     return this.prisma.station.delete({ where: { id } });
   }
 }

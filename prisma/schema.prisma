@@ -24,7 +24,7 @@ enum TicketStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           Int      @id @default(autoincrement())
   email        String   @unique
   passwordHash String
   fullName     String
@@ -37,7 +37,7 @@ model User {
 }
 
 model Station {
-  id               String        @id @default(cuid())
+  id               Int           @id @default(autoincrement())
   code             String        @unique
   name             String
   phone            String?
@@ -53,7 +53,7 @@ model Station {
 }
 
 model Train {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   code      String   @unique
   name      String
   createdAt DateTime @default(now())
@@ -63,8 +63,8 @@ model Train {
 }
 
 model Coach {
-  id          String   @id @default(cuid())
-  trainId     String
+  id          Int      @id @default(autoincrement())
+  trainId     Int
   code        String
   index       Int
   name        String
@@ -81,8 +81,8 @@ model Coach {
 }
 
 model Seat {
-  id          String   @id @default(cuid())
-  coachId     String
+  id          Int      @id @default(autoincrement())
+  coachId     Int
   number      String
   type        SeatType
   description String?
@@ -96,8 +96,8 @@ model Seat {
 }
 
 model Trip {
-  id             String        @id @default(cuid())
-  trainId        String
+  id             Int           @id @default(autoincrement())
+  trainId        Int
   code           String        @unique
   departureDate  DateTime
   createdAt      DateTime      @default(now())
@@ -111,9 +111,9 @@ model Trip {
 }
 
 model TripStation {
-  id            String    @id @default(cuid())
-  tripId        String
-  stationId     String
+  id            Int       @id @default(autoincrement())
+  tripId        Int
+  stationId     Int
   stationOrder  Int
   arrivalTime   DateTime?
   departureTime DateTime?
@@ -127,10 +127,10 @@ model TripStation {
 }
 
 model SegmentPrice {
-  id            String   @id @default(cuid())
-  tripId        String
-  fromStationId String
-  toStationId   String
+  id            Int      @id @default(autoincrement())
+  tripId        Int
+  fromStationId Int
+  toStationId   Int
   priceCents    Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -144,12 +144,12 @@ model SegmentPrice {
 }
 
 model Ticket {
-  id            String       @id @default(cuid())
-  userId        String
-  tripId        String
-  seatId        String
-  fromStationId String
-  toStationId   String
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  tripId        Int
+  seatId        Int
+  fromStationId Int
+  toStationId   Int
   fromOrder     Int
   toOrder       Int
   status        TicketStatus @default(BOOKED)

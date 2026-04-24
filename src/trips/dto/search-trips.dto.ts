@@ -1,13 +1,16 @@
-import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsOptional, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class SearchTripsDto {
   @IsOptional()
-  @IsString()
-  from?: string;
+  @IsInt()
+  @Type(() => Number)
+  from?: number;
 
   @IsOptional()
-  @IsString()
-  to?: string;
+  @IsInt()
+  @Type(() => Number)
+  to?: number;
 
   @IsOptional()
   @IsDateString()
