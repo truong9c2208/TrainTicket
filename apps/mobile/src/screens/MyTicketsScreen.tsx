@@ -8,7 +8,7 @@ export function MyTicketsScreen() {
   const ticketsQuery = useMyTickets();
   const cancelMutation = useCancelTicket();
 
-  const cancel = async (ticketId: string) => {
+  const cancel = async (ticketId: number) => {
     try {
       await cancelMutation.mutateAsync({ ticketId });
       Alert.alert('Canceled', 'Ticket canceled and refund processed.');

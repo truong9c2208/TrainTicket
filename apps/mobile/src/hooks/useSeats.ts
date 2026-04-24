@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getAvailableSeats } from '../api/trip.api';
 
 export function useAvailableSeats(params: {
-  tripId?: string;
-  from?: string;
-  to?: string;
+  tripId?: number;
+  from?: number;
+  to?: number;
 }) {
   return useQuery({
     queryKey: ['seats', params],

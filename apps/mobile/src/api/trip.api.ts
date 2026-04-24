@@ -2,8 +2,8 @@ import { api } from './client';
 import { AvailableSeatsResponse, Trip } from '../types/api';
 
 export const getTrips = async (params: {
-  from?: string;
-  to?: string;
+  from?: number;
+  to?: number;
   date?: string;
 }) => {
   const data = await api.get<Trip[]>('/trips', { params });
@@ -19,14 +19,14 @@ export const getTrips = async (params: {
   });
 };
 
-export const getTrip = async (tripId: string) => {
+export const getTrip = async (tripId: number) => {
   return api.get<Trip>(`/trips/${tripId}`);
 };
 
 export const getAvailableSeats = async (params: {
-  tripId: string;
-  from: string;
-  to: string;
+  tripId: number;
+  from: number;
+  to: number;
 }) => {
   return api.get<AvailableSeatsResponse>('/seats/available', { params });
 };

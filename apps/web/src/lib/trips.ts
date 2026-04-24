@@ -2,8 +2,8 @@ import type { Trip } from './types';
 import { webApi } from './client';
 
 export async function getTrips(params: {
-  from?: string;
-  to?: string;
+  from?: number;
+  to?: number;
   date?: string;
 }) {
   const trips = await webApi.get<Trip[]>('/trips', { params });

@@ -2,15 +2,15 @@ import { api } from './client';
 import { Ticket } from '../types/api';
 
 export const bookTicket = async (payload: {
-  tripId: string;
-  seatId: string;
-  fromStationId: string;
-  toStationId: string;
+  tripId: number;
+  seatId: number;
+  fromStationId: number;
+  toStationId: number;
 }) => {
   return api.post<Ticket>('/tickets/book', payload);
 };
 
-export const cancelTicket = async (payload: { ticketId: string }) => {
+export const cancelTicket = async (payload: { ticketId: number }) => {
   return api.post<Ticket>('/tickets/cancel', payload);
 };
 

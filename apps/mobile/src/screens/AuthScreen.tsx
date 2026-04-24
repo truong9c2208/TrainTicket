@@ -10,8 +10,8 @@ import {
   validateEmail,
   validateFullName,
   validatePassword,
-} from '../../../shared/src/validation/auth';
-import { HttpError } from '../../../shared/src/api/http-client';
+} from '@repo/shared/src/validation/auth';
+import { HttpError } from '@repo/shared/src/api/http-client';
 
 type AuthForm = {
   fullName: string;

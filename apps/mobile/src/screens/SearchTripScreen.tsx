@@ -18,7 +18,7 @@ import { useAuthStore } from '../store/auth.store';
 import { useThemeStore } from '../store/theme.store';
 import { useAppTheme } from '../theme';
 import { RootStackParamList } from '../navigation/types';
-import { ACCESS_TOKEN_KEY } from '../../../shared/src/auth/session';
+import { ACCESS_TOKEN_KEY } from '@repo/shared/src/auth/session';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SearchTrip'>;
 
@@ -41,8 +41,8 @@ export function SearchTripScreen({ navigation }: Props) {
   const { commonStyles, colors, mode } = useAppTheme();
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const logout = useAuthStore((s) => s.logout);
-  const [selectedFrom, setSelectedFrom] = useState<{ id: string; name: string } | null>(null);
-  const [selectedTo, setSelectedTo] = useState<{ id: string; name: string } | null>(null);
+  const [selectedFrom, setSelectedFrom] = useState<{ id: number; name: string } | null>(null);
+  const [selectedTo, setSelectedTo] = useState<{ id: number; name: string } | null>(null);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
   const [stationQuery, setStationQuery] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -78,7 +78,7 @@ export function SearchTripScreen({ navigation }: Props) {
     logout();
   };
 
-  const handleSelectStation = (station: { id: string; name: string }) => {
+  const handleSelectStation = (station: { id: number; name: string }) => {
     if (pickerTarget === 'from') {
       setSelectedFrom(station);
       setValue('fromName', station.name);
@@ -225,7 +225,7 @@ export function SearchTripScreen({ navigation }: Props) {
 
             <FlatList
               data={suggestions}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => String(item.id)}
               style={{ marginTop: 12 }}
               renderItem={({ item }) => (
                 <Pressable

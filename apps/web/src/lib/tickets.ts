@@ -6,14 +6,14 @@ export function getMyTickets() {
 }
 
 export function bookTicket(payload: {
-  tripId: string;
-  seatId: string;
-  fromStationId: string;
-  toStationId: string;
+  tripId: number;
+  seatId: number;
+  fromStationId: number;
+  toStationId: number;
 }) {
   return webApi.post<Ticket>('/tickets/book', payload);
 }
 
-export function cancelTicket(payload: { ticketId: string }) {
+export function cancelTicket(payload: { ticketId: number }) {
   return webApi.post<Ticket>('/tickets/cancel', payload);
 }

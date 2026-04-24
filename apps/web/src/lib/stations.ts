@@ -8,7 +8,7 @@ export async function searchStations(q: string) {
     return await webApi.get<Station[]>('/stations', { params: { q } });
   } catch {
     const trips = await webApi.get<Trip[]>('/trips');
-    const uniqueStations = new Map<string, Station>();
+    const uniqueStations = new Map<number, Station>();
 
     for (const trip of trips) {
       for (const stop of trip.stations ?? []) {

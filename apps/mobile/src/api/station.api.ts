@@ -10,7 +10,7 @@ export const searchStations = async (q: string) => {
     // Fallback for older deployments that do not expose /stations yet.
     const trips = await api.get<Trip[]>('/trips');
 
-    const uniqueStations = new Map<string, Station>();
+    const uniqueStations = new Map<number, Station>();
 
     for (const trip of trips) {
       for (const stop of trip.stations ?? []) {

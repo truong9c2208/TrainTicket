@@ -26,6 +26,12 @@ function toDateInputValue(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
+function formatDateTime(dateString: string) {
+  const d = new Date(dateString);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`;
+}
+
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('app-theme');
@@ -53,8 +59,8 @@ function App() {
   const [stationsLoading, setStationsLoading] = useState(false);
   const [stationsError, setStationsError] = useState<string | null>(null);
 
-  const [fromStationId, setFromStationId] = useState('');
-  const [toStationId, setToStationId] = useState('');
+  const [fromStationId, setFromStationId] = useState<number | ''>('');
+  const [toStationId, setToStationId] = useState<number | ''>('');
   const [travelDate, setTravelDate] = useState(toDateInputValue(new Date()));
   const [trips, setTrips] = useState<Trip[]>([]);
   const [tripLoading, setTripLoading] = useState(false);
@@ -70,7 +76,7 @@ function App() {
   const [seatsLoading, setSeatsLoading] = useState(false);
   const [seatsError, setSeatsError] = useState<string | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<SeatAvailability | null>(null);
-  const [activeCoach, setActiveCoach] = useState<string>('');
+  const [activeCoach, setActiveCoach] = useState<number | ''>('');
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -103,7 +109,7 @@ function App() {
   const selectedTo = useMemo(() => stations.find((station) => station.id === toStationId), [toStationId, stations]);
 
   const coaches = useMemo(() => {
-    const map = new Map<string, { code: string; index: number }>();
+    const map = new Map<number, { code: string; index: number }>();
     seats.forEach((s) => map.set(s.coachId, { code: s.coachCode, index: s.coachIndex }));
     return Array.from(map.entries())
       .map(([id, info]) => ({ id, ...info }))
@@ -159,7 +165,7 @@ function App() {
 
     setTripLoading(true);
     try {
-      const data = await getTrips({ from: fromStationId, to: toStationId, date: travelDate });
+      const data = await getTrips({ from: Number(fromStationId), to: Number(toStationId), date: travelDate });
       setTrips(data);
     } catch (error) {
       const httpError = error as HttpError;
@@ -190,7 +196,7 @@ function App() {
     setSeatsLoading(true);
 
     try {
-      const res = await getAvailableSeats({ tripId: trip.id, from: fromStationId, to: toStationId });
+      const res = await getAvailableSeats({ tripId: trip.id, from: Number(fromStationId), to: Number(toStationId) });
       setSeats(res.seats);
       setPriceCents(res.priceCents);
       if (res.seats.length > 0) {
@@ -211,8 +217,8 @@ function App() {
       await bookTicket({
         tripId: selectedTrip.id,
         seatId: selectedSeat.seatId,
-        fromStationId,
-        toStationId,
+        fromStationId: Number(fromStationId),
+        toStationId: Number(toStationId),
       });
       setSelectedTrip(null);
       setSelectedSeat(null);
@@ -225,7 +231,7 @@ function App() {
     }
   };
 
-  const handleCancelTicket = async (ticketId: string) => {
+  const handleCancelTicket = async (ticketId: number) => {
     if (!confirm('Are you sure you want to cancel this ticket?')) return;
     setActionLoading(true);
     try {
@@ -325,7 +331,7 @@ function App() {
           <div className="header-actions">
             <div>
               <h2>{selectedTrip.train.name} ({selectedTrip.code})</h2>
-              <p className="subtle">{selectedFrom?.name} to {selectedTo?.name} • {new Date(selectedTrip.departureDate).toLocaleString()}</p>
+              <p className="subtle">{selectedFrom?.name} to {selectedTo?.name} • {formatDateTime(selectedTrip.departureDate)}</p>
             </div>
           </div>
 
@@ -405,7 +411,7 @@ function App() {
           <form onSubmit={handleSearchTrips} className="stack">
             <label className="field">
               Origin
-              <select value={fromStationId} onChange={(e) => setFromStationId(e.target.value)} disabled={stationsLoading} required>
+              <select value={fromStationId} onChange={(e) => setFromStationId(e.target.value ? Number(e.target.value) : '')} disabled={stationsLoading} required>
                 <option value="">Select origin</option>
                 {stations.map((station) => (
                   <option key={station.id} value={station.id}>
@@ -417,7 +423,7 @@ function App() {
 
             <label className="field">
               Destination
-              <select value={toStationId} onChange={(e) => setToStationId(e.target.value)} disabled={stationsLoading} required>
+              <select value={toStationId} onChange={(e) => setToStationId(e.target.value ? Number(e.target.value) : '')} disabled={stationsLoading} required>
                 <option value="">Select destination</option>
                 {stations.map((station) => (
                   <option key={station.id} value={station.id}>
@@ -453,7 +459,7 @@ function App() {
                   <p>
                     {trip.fromStationName} to {trip.toStationName}
                   </p>
-                  <p className="subtle">Departure: {new Date(trip.departureDate).toLocaleString()}</p>
+                  <p className="subtle">Departure: {formatDateTime(trip.departureDate)}</p>
                 </div>
               ))
             )}
@@ -479,7 +485,7 @@ function App() {
                   <p>
                     Coach {ticket.seat.coach.code} - Seat {ticket.seat.number} ({ticket.seat.type})
                   </p>
-                  <p className="subtle">Booked at: {new Date(ticket.bookedAt).toLocaleString()}</p>
+                  <p className="subtle">Booked at: {formatDateTime(ticket.bookedAt)}</p>
                   {ticket.status === 'BOOKED' && (
                     <button className="cancel-btn" disabled={actionLoading} onClick={() => handleCancelTicket(ticket.id)}>
                       Cancel Ticket

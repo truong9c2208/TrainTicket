@@ -2,8 +2,8 @@ import { create } from 'zustand';
 
 type AuthState = {
   token: string | null;
-  userId: string | null;
-  setAuth: (token: string, userId: string) => void;
+  userId: number | null;
+  setAuth: (token: string, userId: number) => void;
   logout: () => void;
 };
 

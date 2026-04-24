@@ -1,20 +1,20 @@
 export type AuthResponse = {
   accessToken: string;
   user: {
-    id: string;
+    id: number;
     email: string;
     role: string;
   };
 };
 
 export type Station = {
-  id: string;
+  id: number;
   code: string;
   name: string;
 };
 
 export type TripStation = {
-  stationId: string;
+  stationId: number;
   stationOrder: number;
   arrivalTime?: string | null;
   departureTime?: string | null;
@@ -22,13 +22,13 @@ export type TripStation = {
 };
 
 export type Trip = {
-  id: string;
+  id: number;
   code: string;
   departureDate: string;
   fromStationName?: string;
   toStationName?: string;
   train: {
-    id: string;
+    id: number;
     code: string;
     name: string;
   };
@@ -36,8 +36,8 @@ export type Trip = {
 };
 
 export type SeatAvailability = {
-  seatId: string;
-  coachId: string;
+  seatId: number;
+  coachId: number;
   coachCode: string;
   coachIndex: number;
   seatNumber: string;
@@ -46,20 +46,20 @@ export type SeatAvailability = {
 };
 
 export type AvailableSeatsResponse = {
-  tripId: string;
-  from: string;
-  to: string;
+  tripId: number;
+  from: number;
+  to: number;
   priceCents: number;
   seats: SeatAvailability[];
   availableSeats: SeatAvailability[];
 };
 
 export type Ticket = {
-  id: string;
-  tripId: string;
-  seatId: string;
-  fromStationId: string;
-  toStationId: string;
+  id: number;
+  tripId: number;
+  seatId: number;
+  fromStationId: number;
+  toStationId: number;
   status: 'BOOKED' | 'CANCELED';
   priceCents: number;
   refundCents?: number | null;

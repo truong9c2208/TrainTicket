@@ -1,14 +1,14 @@
 export type RootStackParamList = {
   Auth: undefined;
   SearchTrip: undefined;
-  TripList: { from: string; to: string; fromName: string; toName: string; date?: string };
-  TripDetail: { tripId: string; from: string; to: string; fromName: string; toName: string };
-  SeatSelection: { tripId: string; from: string; to: string };
+  TripList: { from: number; to: number; fromName: string; toName: string; date?: string };
+  TripDetail: { tripId: number; from: number; to: number; fromName: string; toName: string };
+  SeatSelection: { tripId: number; from: number; to: number };
   BookingConfirmation: {
-    tripId: string;
-    seatId: string;
-    fromStationId: string;
-    toStationId: string;
+    tripId: number;
+    seatId: number;
+    fromStationId: number;
+    toStationId: number;
   };
   MyTickets: undefined;
 };

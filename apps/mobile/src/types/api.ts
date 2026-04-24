@@ -1,1 +1,1 @@
-export * from '../../../shared/src/types/api';
+export * from '@repo/shared/src/types/api';

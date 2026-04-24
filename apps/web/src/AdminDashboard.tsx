@@ -67,7 +67,14 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                 <tbody>
                   {data.map((item, i) => (
                     <tr key={i}>
-                      {Object.keys(item).map(k => typeof item[k] !== 'object' && <td key={k} style={{ borderBottom: '1px solid #eee', padding: '8px' }}>{String(item[k])}</td>)}
+                      {Object.keys(item).map(k => {
+                        if (typeof item[k] === 'object') return null;
+                        let val = item[k];
+                        if (k === 'occupancyRate' && typeof val === 'number') {
+                          val = val.toFixed(2);
+                        }
+                        return <td key={k} style={{ borderBottom: '1px solid #eee', padding: '8px' }}>{String(val)}</td>;
+                      })}
                     </tr>
                   ))}
                 </tbody>
