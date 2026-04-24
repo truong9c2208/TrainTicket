@@ -1,4 +1,4 @@
-const { PrismaClient, SeatType, TicketStatus } = require('@prisma/client');
+const { PrismaClient, SeatType, TicketStatus, Role } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
@@ -41,13 +41,29 @@ async function resetData() {
 async function main() {
   await resetData();
 
-  const user = await prisma.user.upsert({
+  const customer = await prisma.user.upsert({
     where: { email: 'demo.user@train.local' },
     update: {},
     create: {
       email: 'demo.user@train.local',
-      fullName: 'Demo User',
+      fullName: 'Demo Customer',
       passwordHash: '$2b$10$MCf6x9WceMjeA5xAAsbEV.SvHF6E53P7IvrQj6MKf5H8pxf3gDO/e',
+      role: Role.CUSTOMER,
+      phone: '0987654321',
+      address: 'Hanoi, Vietnam',
+    },
+  });
+
+  const manager = await prisma.user.upsert({
+    where: { email: 'admin@train.local' },
+    update: {},
+    create: {
+      email: 'admin@train.local',
+      fullName: 'System Admin',
+      passwordHash: '$2b$10$MCf6x9WceMjeA5xAAsbEV.SvHF6E53P7IvrQj6MKf5H8pxf3gDO/e', // password is "password" <(")
+      role: Role.MANAGER,
+      phone: '0123456789',
+      address: 'Danang, Vietnam',
     },
   });
 
@@ -149,7 +165,7 @@ async function main() {
 
     await prisma.ticket.create({
       data: {
-        userId: user.id,
+        userId: customer.id,
         tripId: trip.id,
         seatId: seat.id,
         fromStationId: fromStation.id,
@@ -162,10 +178,72 @@ async function main() {
     });
   }
 
+  const train2 = await prisma.train.create({
+    data: {
+      code: 'SE-SEED-02',
+      name: 'Vietnam Express Premium',
+      coaches: {
+        create: Array.from({ length: 3 }).map((_, coachIndex) => ({
+          code: `VIP${coachIndex + 1}`,
+          index: coachIndex + 1,
+          type: 'VIP',
+          seats: {
+            create: Array.from({ length: 15 }).map((__, seatIndex) => ({
+              number: `${coachIndex + 1}${String(seatIndex + 1).padStart(2, '0')}`,
+              type: SeatType.SEAT,
+            })),
+          },
+        })),
+      },
+    },
+  });
+
+  const trip2Date = new Date();
+  trip2Date.setDate(trip2Date.getDate() + 2);
+  trip2Date.setHours(14, 30, 0, 0);
+
+  const trip2 = await prisma.trip.create({
+    data: {
+      trainId: train2.id,
+      code: 'TRIP-SEED-02',
+      departureDate: trip2Date,
+    },
+  });
+
+  const reverseStations = [...stations].reverse();
+  for (let i = 0; i < reverseStations.length; i++) {
+    const stationTime = new Date(trip2Date.getTime() + i * 1000 * 60 * 115); // faster trip
+    await prisma.tripStation.create({
+      data: {
+        tripId: trip2.id,
+        stationId: reverseStations[i].id,
+        stationOrder: i + 1,
+        arrivalTime: i === 0 ? null : stationTime,
+        departureTime: i === reverseStations.length - 1 ? null : new Date(stationTime.getTime() + 1000 * 60 * 8),
+      },
+    });
+  }
+
+  for (let from = 0; from < reverseStations.length - 1; from++) {
+    for (let to = from + 1; to < reverseStations.length; to++) {
+      await prisma.segmentPrice.create({
+        data: {
+          tripId: trip2.id,
+          fromStationId: reverseStations[from].id,
+          toStationId: reverseStations[to].id,
+          priceCents: 60000 + (to - from) * 20000,
+        },
+      });
+    }
+  }
+
   console.log('Seed complete:');
   console.log(`- Stations: ${stations.length}`);
-  console.log(`- Seats: ${seatCount}`);
-  console.log('- Trip: 1');
+  console.log(`- Seats seeded for Trip 1: ${seatCount}`);
+  console.log('- Trips: 2');
+  console.log('- Users: 2 (1 Customer, 1 Manager)');
+  console.log('  Customer: demo.user@train.local');
+  console.log('  Manager: admin@train.local');
 }
 
 main()
