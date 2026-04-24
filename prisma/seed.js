@@ -81,6 +81,8 @@ async function main() {
         create: Array.from({ length: 5 }).map((_, coachIndex) => ({
           code: `C${coachIndex + 1}`,
           index: coachIndex + 1,
+          name: `Coach ${coachIndex + 1}`,
+          type: 'Economy',
           seats: {
             create: Array.from({ length: 10 }).map((__, seatIndex) => ({
               number: `${coachIndex + 1}${String(seatIndex + 1).padStart(2, '0')}`,
@@ -186,6 +188,7 @@ async function main() {
         create: Array.from({ length: 3 }).map((_, coachIndex) => ({
           code: `VIP${coachIndex + 1}`,
           index: coachIndex + 1,
+          name: `VIP Coach ${coachIndex + 1}`,
           type: 'VIP',
           seats: {
             create: Array.from({ length: 15 }).map((__, seatIndex) => ({
