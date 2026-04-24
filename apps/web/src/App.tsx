@@ -14,6 +14,7 @@ import { getMyTickets, bookTicket, cancelTicket } from './lib/tickets';
 import { getTrips } from './lib/trips';
 import { getAvailableSeats } from './lib/seats';
 import type { Station, Ticket, Trip, SeatAvailability } from './lib/types';
+import AdminDashboard from './AdminDashboard';
 import './App.css';
 
 type AuthMode = 'login' | 'register';
@@ -40,6 +41,7 @@ function App() {
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
 
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(ACCESS_TOKEN_KEY));
+  const [userRole, setUserRole] = useState<string | null>(() => localStorage.getItem('USER_ROLE'));
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -137,6 +139,7 @@ function App() {
         await register({ email, password, fullName });
       }
       setToken(localStorage.getItem(ACCESS_TOKEN_KEY));
+      setUserRole(localStorage.getItem('USER_ROLE'));
       setEmail('');
       setPassword('');
       setFullName('');
@@ -238,7 +241,9 @@ function App() {
 
   const handleLogout = () => {
     clearAuthToken();
+    localStorage.removeItem('USER_ROLE');
     setToken(null);
+    setUserRole(null);
     setTrips([]);
     setTickets([]);
   };
@@ -295,6 +300,10 @@ function App() {
         </section>
       </main>
     );
+  }
+
+  if (userRole === 'MANAGER') {
+    return <AdminDashboard onLogout={handleLogout} />;
   }
 
   if (selectedTrip) {

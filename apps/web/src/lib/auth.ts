@@ -6,6 +6,7 @@ export async function login(payload: { email: string; password: string }) {
   const data = await webApi.post<AuthResponse>('/auth/login', payload);
   const session = toAuthSession(data);
   localStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
+  localStorage.setItem('USER_ROLE', data.user.role);
   return data;
 }
 
@@ -17,5 +18,6 @@ export async function register(payload: {
   const data = await webApi.post<AuthResponse>('/auth/register', payload);
   const session = toAuthSession(data);
   localStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
+  localStorage.setItem('USER_ROLE', data.user.role);
   return data;
 }
