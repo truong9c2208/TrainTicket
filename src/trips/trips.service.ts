@@ -96,4 +96,42 @@ export class TripsService {
       departureTime: from.departureTime,
     };
   }
+
+  // Admin / Manager Methods
+
+  async create(data: any) {
+    return this.prisma.trip.create({ data });
+  }
+
+  async update(id: string, data: any) {
+    return this.prisma.trip.update({ where: { id }, data });
+  }
+
+  async remove(id: string) {
+    return this.prisma.trip.delete({ where: { id } });
+  }
+
+  async setSchedule(tripId: string, stations: { stationId: string; stationOrder: number; arrivalTime?: string; departureTime?: string }[]) {
+    // We can replace the old schedule with the new one
+    await this.prisma.tripStation.deleteMany({ where: { tripId } });
+    const createData = stations.map(s => ({
+      tripId,
+      stationId: s.stationId,
+      stationOrder: s.stationOrder,
+      arrivalTime: s.arrivalTime ? new Date(s.arrivalTime) : null,
+      departureTime: s.departureTime ? new Date(s.departureTime) : null,
+    }));
+    await this.prisma.tripStation.createMany({ data: createData });
+    return this.prisma.tripStation.findMany({ where: { tripId }, orderBy: { stationOrder: 'asc' } });
+  }
+
+  async setSegmentPrices(tripId: string, prices: { fromStationId: string; toStationId: string; priceCents: number }[]) {
+    await this.prisma.segmentPrice.deleteMany({ where: { tripId } });
+    const createData = prices.map(p => ({
+      tripId,
+      ...p,
+    }));
+    await this.prisma.segmentPrice.createMany({ data: createData });
+    return this.prisma.segmentPrice.findMany({ where: { tripId } });
+  }
 }

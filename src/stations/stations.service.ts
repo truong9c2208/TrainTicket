@@ -22,4 +22,16 @@ export class StationsService {
       take: 20,
     });
   }
+
+  async create(data: { code: string; name: string; phone?: string; address?: string; description?: string }) {
+    return this.prisma.station.create({ data });
+  }
+
+  async update(id: string, data: { name?: string; phone?: string; address?: string; description?: string }) {
+    return this.prisma.station.update({ where: { id }, data });
+  }
+
+  async remove(id: string) {
+    return this.prisma.station.delete({ where: { id } });
+  }
 }

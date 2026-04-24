@@ -51,7 +51,7 @@ export class TicketsService {
 
     return this.lockService.withLock(lockKey, 8000, async () => {
       return this.prisma.$transaction(async (tx) => {
-        const [seat, segment, price] = await Promise.all([
+        const [seat, segment, price, routeFromStation] = await Promise.all([
           tx.seat.findUnique({
             where: { id: dto.seatId },
             include: { coach: true },
@@ -69,6 +69,15 @@ export class TicketsService {
                 toStationId: dto.toStationId,
               },
             },
+          }),
+          tx.tripStation.findUnique({
+            where: {
+              tripId_stationId: {
+                tripId: dto.tripId,
+                stationId: dto.fromStationId,
+              },
+            },
+            select: { departureTime: true },
           }),
         ]);
 
@@ -111,7 +120,10 @@ export class TicketsService {
           throw new ConflictException('Seat already booked for overlapping segment');
         }
 
-        const resolvedPrice = price?.priceCents ?? 0;
+        let resolvedPrice = price?.priceCents ?? 0;
+        if (routeFromStation?.departureTime) {
+          resolvedPrice = this.getDynamicPrice(resolvedPrice, routeFromStation.departureTime, new Date());
+        }
 
         return tx.ticket.create({
           data: {
@@ -191,10 +203,29 @@ export class TicketsService {
     }
 
     if (diffHours > 24) {
+      return 0.2;
+    }
+
+    if (diffHours > 0) {
       return 0.5;
     }
 
     return 1;
+  }
+
+  private getDynamicPrice(basePrice: number, departure: Date, now: Date) {
+    const diffHours = (departure.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    if (diffHours > 24 * 7) {
+      return Math.floor(basePrice * 0.9);
+    }
+    if (diffHours < 24) {
+      return Math.floor(basePrice * 1.5);
+    }
+    if (diffHours < 24 * 3) {
+      return Math.floor(basePrice * 1.2);
+    }
+    return basePrice;
   }
 
   private serializableTx() {
