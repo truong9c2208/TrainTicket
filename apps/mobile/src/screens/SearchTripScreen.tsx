@@ -3,6 +3,7 @@ import {
   Alert,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -31,14 +32,19 @@ type SearchForm = {
 type PickerTarget = 'from' | 'to' | null;
 
 function toDateInputValue(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function formatDisplayDate(dateStr: string) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export function SearchTripScreen({ navigation }: Props) {
-  const { commonStyles, colors, mode } = useAppTheme();
+  const { commonStyles, colors } = useAppTheme();
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const logout = useAuthStore((s) => s.logout);
   const [selectedFrom, setSelectedFrom] = useState<{ id: number; name: string } | null>(null);
@@ -48,13 +54,7 @@ export function SearchTripScreen({ navigation }: Props) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [travelDate, setTravelDate] = useState(new Date());
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<SearchForm>({
+  const { control, handleSubmit, setValue, watch } = useForm<SearchForm>({
     defaultValues: {
       fromName: '',
       toName: '',
@@ -63,9 +63,10 @@ export function SearchTripScreen({ navigation }: Props) {
   });
 
   const dateValue = watch('date');
+  const fromName = watch('fromName');
+  const toName = watch('toName');
 
   const stationsQuery = useStations(stationQuery);
-
   const suggestions = useMemo(() => stationsQuery.data ?? [], [stationsQuery.data]);
 
   const openStationPicker = (target: Exclude<PickerTarget, null>) => {
@@ -73,110 +74,184 @@ export function SearchTripScreen({ navigation }: Props) {
     setStationQuery('');
   };
 
+  const handleSelectStation = (station: { id: number; name: string }) => {
+    if (pickerTarget === 'from') {
+      setSelectedFrom(station);
+      setValue('fromName', station.name);
+    } else if (pickerTarget === 'to') {
+      setSelectedTo(station);
+      setValue('toName', station.name);
+    }
+    setPickerTarget(null);
+  };
+
+  const handleSwapStations = () => {
+    const tmpFrom = selectedFrom;
+    const tmpTo = selectedTo;
+    setSelectedFrom(tmpTo);
+    setSelectedTo(tmpFrom);
+    setValue('fromName', tmpTo?.name ?? '');
+    setValue('toName', tmpFrom?.name ?? '');
+  };
+
+  const onDateChange = (_event: DateTimePickerEvent, selected?: Date) => {
+    setShowDatePicker(false);
+    if (!selected) return;
+    setTravelDate(selected);
+    setValue('date', toDateInputValue(selected));
+  };
+
   const handleLogout = async () => {
     await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
     logout();
   };
 
-  const handleSelectStation = (station: { id: number; name: string }) => {
-    if (pickerTarget === 'from') {
-      setSelectedFrom(station);
-      setValue('fromName', station.name);
-    }
-
-    if (pickerTarget === 'to') {
-      setSelectedTo(station);
-      setValue('toName', station.name);
-    }
-
-    setPickerTarget(null);
-  };
-
-  const onDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (!selectedDate) {
-      return;
-    }
-
-    setTravelDate(selectedDate);
-    setValue('date', toDateInputValue(selectedDate));
-  };
-
   return (
-    <ScrollView style={commonStyles.container}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={commonStyles.heading}>Find Train</Text>
-        <Pressable style={[commonStyles.button, { paddingVertical: 8 }]} onPress={toggleTheme}>
-          <Text style={commonStyles.buttonText}>{mode === 'light' ? 'Dark' : 'Light'}</Text>
+    <ScrollView
+      style={commonStyles.container}
+      contentContainerStyle={commonStyles.scrollContent}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      {/* Header */}
+      <View style={[commonStyles.row, { justifyContent: 'space-between', marginBottom: 28 }]}>
+        <View>
+          <Text style={commonStyles.heading}>Find your trip</Text>
+          <Text style={commonStyles.bodyText}>Search and book train tickets</Text>
+        </View>
+        <Pressable
+          style={({ pressed }) => [
+            commonStyles.buttonSecondary,
+            { paddingVertical: 9, paddingHorizontal: 14, opacity: pressed ? 0.7 : 1 },
+          ]}
+          onPress={toggleTheme}
+        >
+          <Text style={commonStyles.buttonTextSecondary}>Theme</Text>
         </Pressable>
       </View>
 
-      <Text style={[commonStyles.bodyText, { marginBottom: 12 }]}>Search station by name, not ID.</Text>
-
-      <View style={commonStyles.card}>
+      {/* Search card */}
+      <View
+        style={{
+          backgroundColor: colors.card,
+          borderRadius: 20,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: colors.cardBorder,
+          marginBottom: 16,
+          ...Platform.select({
+            ios: {
+              shadowColor: colors.shadowColor,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.07,
+              shadowRadius: 16,
+            },
+            android: { elevation: 3 },
+            default: {},
+          }),
+        }}
+      >
+        {/* Origin */}
+        <Text style={commonStyles.label}>Origin</Text>
         <Controller
           control={control}
           name="fromName"
-          rules={{ required: 'Origin station is required' }}
-          render={({ field }) => (
-            <View style={{ marginBottom: 12 }}>
-              <Text style={commonStyles.label}>Origin</Text>
-              <Pressable style={commonStyles.input} onPress={() => openStationPicker('from')}>
-                <Text style={{ color: field.value ? colors.textPrimary : colors.textSecondary }}>
-                  {field.value || 'Tap to select station'}
-                </Text>
-              </Pressable>
-              {errors.fromName ? (
-                <Text style={{ color: colors.danger, marginTop: 6 }}>{errors.fromName.message}</Text>
-              ) : null}
-            </View>
+          rules={{ required: true }}
+          render={() => (
+            <Pressable
+              style={({ pressed }) => [
+                commonStyles.input,
+                {
+                  justifyContent: 'center',
+                  borderColor: pressed ? colors.accent : colors.inputBorder,
+                  marginBottom: 4,
+                },
+              ]}
+              onPress={() => openStationPicker('from')}
+            >
+              <Text style={{ color: fromName ? colors.textPrimary : colors.textHint, fontSize: 15 }}>
+                {fromName || 'Tap to select origin'}
+              </Text>
+            </Pressable>
           )}
         />
 
+        {/* Swap button */}
+        <View style={{ alignItems: 'center', marginVertical: 6 }}>
+          <Pressable
+            style={({ pressed }) => ({
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.cardBorder,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.6 : 1,
+            })}
+            onPress={handleSwapStations}
+          >
+            <Text style={{ color: colors.accent, fontSize: 18, lineHeight: 22 }}>⇅</Text>
+          </Pressable>
+        </View>
+
+        {/* Destination */}
+        <Text style={commonStyles.label}>Destination</Text>
         <Controller
           control={control}
           name="toName"
-          rules={{ required: 'Destination station is required' }}
-          render={({ field }) => (
-            <View style={{ marginBottom: 12 }}>
-              <Text style={commonStyles.label}>Destination</Text>
-              <Pressable style={commonStyles.input} onPress={() => openStationPicker('to')}>
-                <Text style={{ color: field.value ? colors.textPrimary : colors.textSecondary }}>
-                  {field.value || 'Tap to select station'}
-                </Text>
-              </Pressable>
-              {errors.toName ? (
-                <Text style={{ color: colors.danger, marginTop: 6 }}>{errors.toName.message}</Text>
-              ) : null}
-            </View>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="date"
+          rules={{ required: true }}
           render={() => (
-            <View style={{ marginBottom: 12 }}>
-              <Text style={commonStyles.label}>Travel Date</Text>
-              <Pressable style={commonStyles.input} onPress={() => setShowDatePicker(true)}>
-                <Text style={{ color: colors.textPrimary }}>{dateValue}</Text>
-              </Pressable>
-            </View>
+            <Pressable
+              style={({ pressed }) => [
+                commonStyles.input,
+                {
+                  justifyContent: 'center',
+                  borderColor: pressed ? colors.accent : colors.inputBorder,
+                  marginBottom: 16,
+                },
+              ]}
+              onPress={() => openStationPicker('to')}
+            >
+              <Text style={{ color: toName ? colors.textPrimary : colors.textHint, fontSize: 15 }}>
+                {toName || 'Tap to select destination'}
+              </Text>
+            </Pressable>
           )}
         />
 
-        {showDatePicker ? (
+        {/* Date */}
+        <Text style={commonStyles.label}>Travel date</Text>
+        <Pressable
+          style={({ pressed }) => [
+            commonStyles.input,
+            {
+              justifyContent: 'center',
+              marginBottom: 20,
+              borderColor: pressed ? colors.accent : colors.inputBorder,
+            },
+          ]}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={{ color: colors.textPrimary, fontSize: 15 }}>{formatDisplayDate(dateValue)}</Text>
+        </Pressable>
+
+        {showDatePicker && (
           <DateTimePicker value={travelDate} mode="date" display="default" onChange={onDateChange} />
-        ) : null}
+        )}
 
         <Pressable
-          style={commonStyles.button}
+          style={({ pressed }) => [commonStyles.button, { opacity: pressed ? 0.85 : 1 }]}
           onPress={handleSubmit((form) => {
             if (!selectedFrom || !selectedTo) {
-              Alert.alert('Missing stations', 'Please select both origin and destination stations.');
+              Alert.alert('Select stations', 'Please select both origin and destination.');
               return;
             }
-
+            if (selectedFrom.id === selectedTo.id) {
+              Alert.alert('Invalid route', 'Origin and destination must be different.');
+              return;
+            }
             navigation.navigate('TripList', {
               from: selectedFrom.id,
               to: selectedTo.id,
@@ -186,74 +261,129 @@ export function SearchTripScreen({ navigation }: Props) {
             });
           })}
         >
-          <Text style={commonStyles.buttonText}>Search Trips</Text>
-        </Pressable>
-
-        <Pressable
-          style={[commonStyles.button, { marginTop: 10 }]}
-          onPress={() => navigation.navigate('MyTickets')}
-        >
-          <Text style={commonStyles.buttonText}>My Tickets</Text>
-        </Pressable>
-
-        <Pressable style={{ marginTop: 14 }} onPress={handleLogout}>
-          <Text style={{ color: colors.danger, textAlign: 'center' }}>Logout</Text>
+          <Text style={commonStyles.buttonText}>Search trips</Text>
         </Pressable>
       </View>
 
-      <Modal visible={pickerTarget !== null} transparent animationType="slide" onRequestClose={() => setPickerTarget(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}>
+      {/* Secondary actions */}
+      <Pressable
+        style={({ pressed }) => [
+          commonStyles.buttonSecondary,
+          { marginBottom: 12, opacity: pressed ? 0.7 : 1 },
+        ]}
+        onPress={() => navigation.navigate('MyTickets')}
+      >
+        <Text style={commonStyles.buttonTextSecondary}>My Tickets</Text>
+      </Pressable>
+
+      <Pressable style={{ alignItems: 'center', paddingVertical: 12 }} onPress={handleLogout}>
+        <Text style={{ color: colors.danger, fontSize: 14, fontWeight: '600' }}>Sign out</Text>
+      </Pressable>
+
+      {/* Station picker modal */}
+      <Modal
+        visible={pickerTarget !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setPickerTarget(null)}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }}>
           <View
             style={{
               backgroundColor: colors.card,
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
               borderWidth: 1,
               borderColor: colors.cardBorder,
-              maxHeight: '70%',
-              padding: 16,
+              maxHeight: '75%',
+              paddingTop: 8,
             }}
           >
-            <Text style={[commonStyles.heading, { fontSize: 20 }]}>Choose Station</Text>
-            <TextInput
-              style={commonStyles.input}
-              placeholder="Type station name"
-              placeholderTextColor={colors.textSecondary}
-              value={stationQuery}
-              onChangeText={setStationQuery}
+            {/* Handle */}
+            <View
+              style={{
+                width: 36,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: colors.divider,
+                alignSelf: 'center',
+                marginBottom: 16,
+              }}
             />
 
-            <FlatList
-              data={suggestions}
-              keyExtractor={(item) => String(item.id)}
-              style={{ marginTop: 12 }}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={{
-                    paddingVertical: 12,
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.cardBorder,
-                  }}
-                  onPress={() => handleSelectStation({ id: item.id, name: item.name })}
-                >
-                  <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>{item.name}</Text>
-                  <Text style={{ color: colors.textSecondary }}>{item.code}</Text>
-                </Pressable>
-              )}
-              ListEmptyComponent={
-                <Text style={[commonStyles.bodyText, { paddingVertical: 18 }]}>
-                  {stationsQuery.isLoading
-                    ? 'Loading stations...'
-                    : stationsQuery.isError
-                      ? 'Unable to load stations. Please check your network and login.'
-                      : 'No station found.'}
-                </Text>
-              }
-            />
+            <View style={{ paddingHorizontal: 20, paddingBottom: 16 }}>
+              <Text style={[commonStyles.subheading, { marginBottom: 14 }]}>
+                Select {pickerTarget === 'from' ? 'origin' : 'destination'}
+              </Text>
 
-            <Pressable style={[commonStyles.buttonSecondary, { marginTop: 12 }]} onPress={() => setPickerTarget(null)}>
-              <Text style={commonStyles.buttonText}>Close</Text>
-            </Pressable>
+              <TextInput
+                style={[commonStyles.input, { marginBottom: 12 }]}
+                placeholder="Search by station name..."
+                placeholderTextColor={colors.textHint}
+                value={stationQuery}
+                onChangeText={setStationQuery}
+                autoFocus
+              />
+
+              <FlatList
+                data={suggestions}
+                keyExtractor={(item) => String(item.id)}
+                style={{ maxHeight: 360 }}
+                showsVerticalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={({ pressed }) => ({
+                      paddingVertical: 14,
+                      paddingHorizontal: 4,
+                      borderBottomWidth: 1,
+                      borderBottomColor: colors.divider,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      opacity: pressed ? 0.7 : 1,
+                    })}
+                    onPress={() => handleSelectStation({ id: item.id, name: item.name })}
+                  >
+                    <Text style={{ color: colors.textPrimary, fontWeight: '600', fontSize: 15 }}>
+                      {item.name}
+                    </Text>
+                    <Text
+                      style={{
+                        color: colors.textHint,
+                        fontSize: 12,
+                        fontWeight: '700',
+                        backgroundColor: colors.surface,
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        borderRadius: 6,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {item.code}
+                    </Text>
+                  </Pressable>
+                )}
+                ListEmptyComponent={
+                  <Text style={[commonStyles.bodyText, { paddingVertical: 24, textAlign: 'center' }]}>
+                    {stationsQuery.isLoading
+                      ? 'Loading stations...'
+                      : stationsQuery.isError
+                        ? 'Unable to load stations'
+                        : 'No station found'}
+                  </Text>
+                }
+              />
+
+              <Pressable
+                style={({ pressed }) => [
+                  commonStyles.buttonSecondary,
+                  { marginTop: 12, opacity: pressed ? 0.7 : 1 },
+                ]}
+                onPress={() => setPickerTarget(null)}
+              >
+                <Text style={commonStyles.buttonTextSecondary}>Cancel</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>

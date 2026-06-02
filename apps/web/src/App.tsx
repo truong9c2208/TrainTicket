@@ -258,8 +258,8 @@ function App() {
     return (
       <main className="page auth-page">
         <section className="card auth-card">
-          <h1>Train Ticket</h1>
-          <p className="subtle">Shared Layer Web Client</p>
+          <h1>TrainTicket</h1>
+          <p className="subtle">Book train tickets, fast.</p>
 
           <form onSubmit={handleAuth} className="stack">
             {authMode === 'register' && (
@@ -269,7 +269,7 @@ function App() {
                   value={fullName}
                   onChange={(event) => setFullName(event.target.value)}
                   minLength={AUTH_VALIDATION.fullNameMinLength}
-                  placeholder="John Doe"
+                  placeholder="Your full name"
                   required
                 />
               </label>
@@ -319,7 +319,7 @@ function App() {
           <h1>Seat Selection</h1>
           <div className="topbar-actions">
             <button type="button" className="btn ghost" onClick={toggleTheme}>
-              {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+              {theme === 'light' ? 'Dark mode' : 'Light mode'}
             </button>
             <button type="button" className="btn ghost" onClick={() => setSelectedTrip(null)}>
               ← Back to Trips
@@ -396,7 +396,7 @@ function App() {
         <h1>Train Ticket Dashboard</h1>
         <div className="topbar-actions">
           <button type="button" className="btn ghost" onClick={toggleTheme}>
-            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+            {theme === 'light' ? 'Dark mode' : 'Light mode'}
           </button>
           <button type="button" className="btn ghost" onClick={handleLogout}>
             Logout
@@ -498,9 +498,11 @@ function App() {
         </article>
       </section>
 
-      <footer className="subtle">
-        Current route: {selectedFrom?.name ?? '-'} to {selectedTo?.name ?? '-'} on {travelDate}
-      </footer>
+      {selectedFrom && selectedTo && (
+        <footer className="subtle">
+          Searching: {selectedFrom.name} to {selectedTo.name} on {travelDate}
+        </footer>
+      )}
     </main>
   );
 }
